@@ -37,6 +37,10 @@ class NotImplementedProcessor(Processor):
         return True  # Return True to indicate this is expected behavior
 
 # Common file type configurations
+class TerraformNotImplementedProcessor(NotImplementedProcessor):
+    def __init__(self, vector_store: VectorStore):
+        super().__init__(vector_store, [".tf"])
+
 class PythonNotImplementedProcessor(NotImplementedProcessor):
     """Placeholder for Python file processing."""
     

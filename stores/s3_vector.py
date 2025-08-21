@@ -29,7 +29,7 @@ class S3VectorStore(VectorStore):
         self.aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         self.aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
         self.aws_region = os.environ.get("AWS_REGION", "us-east-2")
-        
+         
         # Initialize AWS clients
         self._init_clients()
         
@@ -55,7 +55,7 @@ class S3VectorStore(VectorStore):
                 aws_secret_access_key=self.aws_secret_access_key
             )
         else:
-            logger.info("Using AWS credentials from instance metadata")
+            logger.info("Using AWS default credentials")
             self.bedrock_client = boto3.client(
                 "bedrock-runtime",
                 region_name=self.aws_region
