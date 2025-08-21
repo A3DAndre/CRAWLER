@@ -23,6 +23,33 @@ from processors.not_implemented import (
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+def validate_environment():
+    """Validate required environment variables."""
+    required_env_vars = [
+        'AWS_ACCESS_KEY_ID',
+        'AWS_SECRET_ACCESS_KEY',
+        'AWS_REGION'
+    ]
+    
+    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
+    
+    if missing_vars:
+        logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+        logger.error("Please set the following environment variables:")
+        for var in missing_vars:
+            logger.error(f"  export {var}=your_value")
+        return False
+    
+    # Optional but recommended
+    optional_vars = ['GITHUB_TOKEN']
+    missing_optional = [var for var in optional_vars if not os.environ.get(var)]
+    
+    if missing_optional:
+        logger.warning(f"Optional environment variables not set: {', '.join(missing_optional)}")
+        logger.warning("Consider setting GITHUB_TOKEN for higher API rate limits")
+    
+    return True
+
 
 def main():
     if not validate_environment():
@@ -31,7 +58,7 @@ def main():
         repo_url = "https://github.com/A3Data/a3wiki-backup"
         branch = "main"
         max_files = 100
-        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github")
+        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github2")
         
         processors = [
             # Implemented processors
@@ -106,29 +133,3 @@ def main():
 if __name__ == "__main__":
     main()
     
-def validate_environment():
-    """Validate required environment variables."""
-    required_env_vars = [
-        'AWS_ACCESS_KEY_ID',
-        'AWS_SECRET_ACCESS_KEY',
-        'AWS_REGION'
-    ]
-    
-    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
-    
-    if missing_vars:
-        logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
-        logger.error("Please set the following environment variables:")
-        for var in missing_vars:
-            logger.error(f"  export {var}=your_value")
-        return False
-    
-    # Optional but recommended
-    optional_vars = ['GITHUB_TOKEN']
-    missing_optional = [var for var in optional_vars if not os.environ.get(var)]
-    
-    if missing_optional:
-        logger.warning(f"Optional environment variables not set: {', '.join(missing_optional)}")
-        logger.warning("Consider setting GITHUB_TOKEN for higher API rate limits")
-    
-    return True

@@ -132,16 +132,16 @@ class MarkdownProcessor(Processor):
                 chunk_metadata = {
                     **metadata,
                     'chunk_index': i,
-                    'total_chunks': len(text_chunks),
-                    'file_type': 'markdown',
-                    'frontmatter': frontmatter,
-                    'document_headers': headers,
-                    'chunk_headers': chunk_headers,
-                    'content_analysis': analysis,
-                    'has_code': '```' in chunk_text or '`' in chunk_text,
-                    'has_links': '[' in chunk_text and '](' in chunk_text,
-                    'has_images': '![' in chunk_text,
-                    'main_title': headers[0]['text'] if headers else None
+                    # 'total_chunks': len(text_chunks),
+                    # 'file_type': 'markdown',
+                    # 'frontmatter': frontmatter,
+                    # 'document_headers': headers,
+                    # 'chunk_headers': chunk_headers,
+                    # 'content_analysis': analysis,
+                    # 'has_code': '```' in chunk_text or '`' in chunk_text,
+                    # 'has_links': '[' in chunk_text and '](' in chunk_text,
+                    # 'has_images': '![' in chunk_text,
+                    # 'main_title': headers[0]['text'] if headers else None
                 }
                 
                 # Create chunk with source reference

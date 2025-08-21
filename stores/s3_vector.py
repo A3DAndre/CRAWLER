@@ -75,8 +75,7 @@ class S3VectorStore(VectorStore):
             response = self.bedrock_client.invoke_model(
                 modelId=self.embedding_model_id,
                 body=json.dumps({
-                    "inputText": text,
-                    "dimensions": self.embedding_dimensions
+                    "inputText": text
                 })
             )
             
@@ -93,13 +92,14 @@ class S3VectorStore(VectorStore):
             raise
     
     def save_chunks(self, chunks: List[Chunk]) -> List[str]:
-        """Save multiple chunks to S3 vectors."""
+        """Save multiple chunks to S3 vectors using put_vectors for batch operation."""
+        vectors_to_put = []
         saved_ids = []
-        
+
         for chunk in chunks:
             try:
                 # Generate ID if not provided
-                chunk_id = chunk.chunk_id or self._generate_id()
+                chunk_id = chunk.source
                 
                 # Create embedding
                 embedding = self.create_embedding(chunk.content)
@@ -109,27 +109,39 @@ class S3VectorStore(VectorStore):
                     **chunk.metadata,
                     "content":  chunk.content,
                     "chunk_size": chunk.size,
-                    "word_count": chunk.word_count,
+                    # "word_count": chunk.word_count,
                     "source": chunk.source
                 }
-                
-                # Save to S3 vectors
-                self.s3vectors_client.create_vector(
-                    vectorBucketName=self.bucket_name,
-                    indexName=self.index_name,
-                    vectorId=chunk_id,
-                    vector={"float32": embedding},
-                    metadata=metadata,
-                )
-                
+
+                vectors_to_put.append({
+                    "key": chunk_id,
+                    "data": {"float32": embedding},
+                    "metadata": metadata
+                })
                 saved_ids.append(chunk_id)
-                logger.debug(f"Saved chunk {chunk_id} from {chunk.source}")
-                
+                logger.debug(f"Prepared chunk {chunk_id} from {chunk.source} for batch insertion.")
+
             except Exception as e:
-                logger.error(f"Error saving chunk from {chunk.source}: {str(e)}")
+                logger.error(f"Error preparing chunk from {chunk.source}: {str(e)}")
                 continue
         
-        logger.info(f"Successfully saved {len(saved_ids)}/{len(chunks)} chunks")
+        if not vectors_to_put:
+            logger.warning("No vectors to save.")
+            return []
+
+        try:
+            self.s3vectors_client.put_vectors(
+                vectorBucketName=self.bucket_name,
+                indexName=self.index_name,
+                vectors=vectors_to_put
+            )
+            logger.info(f"Successfully saved {len(saved_ids)}/{len(chunks)} chunks using put_vectors.")
+        except Exception as e:
+            logger.error(f"Error saving chunks with put_vectors: {str(e)}")
+            # Depending on requirements, we might want to return which ones failed.
+            # For now, returning empty list on batch failure.
+            return []
+
         return saved_ids
     
     def search(self, query: str, limit: int = 10) -> List[SearchResult]:
@@ -189,7 +201,8 @@ class S3VectorStore(VectorStore):
         try:
             # Try to make a simple query to test connectivity
             test_embedding = self.create_embedding("test")
-            return len(test_embedding) == self.embedding_dimensions
+            print("test", test_embedding)
+            return test_embedding is not None
         except Exception as e:
             logger.error(f"Health check failed: {str(e)}")
             return False

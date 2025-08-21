@@ -6,9 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 from stores.s3_vector import S3VectorStore
 
-
-
-
 def main():
     store = S3VectorStore(bucket_name="test-bucket", index_name="test-index")
     try:

@@ -106,10 +106,10 @@ class GitHubCrawler:
             # Create file metadata
             metadata = {
                 'file_path': file_path,
-                'repository': f"{repo_info['owner']}/{repo_info['name']}",
-                'branch': self.branch,
-                'file_size': len(content),
-                'file_type': os.path.splitext(file_path)[1].lower(),
+                # 'repository': f"{repo_info['owner']}/{repo_info['name']}",
+                # 'branch': self.branch,
+                # 'file_size': len(content),
+                # 'file_type': os.path.splitext(file_path)[1].lower(),
                 'sha': file_info.get('sha', ''),
                 'github_url': f"https://github.com/{repo_info['owner']}/{repo_info['name']}/blob/{self.branch}/{file_path}"
             }
