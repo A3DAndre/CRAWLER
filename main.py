@@ -5,10 +5,8 @@ Demonstrates dependency injection configuration pattern.
 """
 from dotenv import load_dotenv
 load_dotenv()
-import argparse
 import sys
 import os
-from typing import List
 
 from crawler import GitHubCrawler
 from stores.s3_vector import S3VectorStore
@@ -26,109 +24,33 @@ from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-def create_vector_store(bucket_name: str, index_name: str) -> S3VectorStore:
-    """Create and configure the vector store."""
-    return S3VectorStore(bucket_name=bucket_name, index_name=index_name)
-
-def create_processors(vector_store: S3VectorStore) -> List[Processor]:
-    """Create and configure all file processors."""
-    processors = [
-        # Implemented processors
-        MarkdownProcessor(vector_store),
-        
-        # Not yet implemented processors (will log and skip)
-        PythonNotImplementedProcessor(vector_store),
-        JavaScriptNotImplementedProcessor(vector_store),
-        JSONNotImplementedProcessor(vector_store),
-        YAMLNotImplementedProcessor(vector_store),
-        TextNotImplementedProcessor(vector_store),
-        ConfigNotImplementedProcessor(vector_store),
-    ]
-    
-    return processors
-
-def configure_crawler(bucket_name: str, index_name: str, branch: str = "main", max_files: int = 100) -> GitHubCrawler:
-    """Configure the crawler with dependency injection."""
-    # Create vector store
-    vector_store = create_vector_store(bucket_name, index_name)
-    
-    # Test vector store connectivity
-    if not vector_store.health_check():
-        logger.error("Vector store health check failed. Please check your AWS configuration.")
-        sys.exit(1)
-    
-    # Create processors
-    processors = create_processors(vector_store)
-    
-    # Create crawler
-    crawler = GitHubCrawler(
-        processors=processors,
-        branch=branch,
-        max_files=max_files
-    )
-    
-    return crawler
-
-def validate_environment():
-    """Validate required environment variables."""
-    required_env_vars = [
-        'AWS_ACCESS_KEY_ID',
-        'AWS_SECRET_ACCESS_KEY',
-        'AWS_REGION'
-    ]
-    
-    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
-    
-    if missing_vars:
-        logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
-        logger.error("Please set the following environment variables:")
-        for var in missing_vars:
-            logger.error(f"  export {var}=your_value")
-        return False
-    
-    # Optional but recommended
-    optional_vars = ['GITHUB_TOKEN']
-    missing_optional = [var for var in optional_vars if not os.environ.get(var)]
-    
-    if missing_optional:
-        logger.warning(f"Optional environment variables not set: {', '.join(missing_optional)}")
-        logger.warning("Consider setting GITHUB_TOKEN for higher API rate limits")
-    
-    return True
-
 def main():
-
-
-    repo_url = "https://github.com/A3Data/a3wiki-backup"
-    branch = "main"
-    max_files = 100
-    vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github")
-    
-    processors = [
-        # Implemented processors
-        MarkdownProcessor(vector_store),
-        
-        # Not yet implemented processors (will log and skip)
-        PythonNotImplementedProcessor(vector_store),
-        JavaScriptNotImplementedProcessor(vector_store),
-        JSONNotImplementedProcessor(vector_store),
-        YAMLNotImplementedProcessor(vector_store),
-        TextNotImplementedProcessor(vector_store),
-        ConfigNotImplementedProcessor(vector_store),
-    ]
-    
-    crawler = GitHubCrawler(
-        processors=processors,
-        branch=branch,
-        max_files=max_files
-    )
     if not validate_environment():
         sys.exit(1)
-    
     try:
-        # Configure crawler
+        repo_url = "https://github.com/A3Data/a3wiki-backup"
+        branch = "main"
+        max_files = 100
+        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github")
+        
+        processors = [
+            # Implemented processors
+            MarkdownProcessor(vector_store),
+            
+            # Not yet implemented processors (will log and skip)
+            PythonNotImplementedProcessor(vector_store),
+            JavaScriptNotImplementedProcessor(vector_store),
+            JSONNotImplementedProcessor(vector_store),
+            YAMLNotImplementedProcessor(vector_store),
+            TextNotImplementedProcessor(vector_store),
+            ConfigNotImplementedProcessor(vector_store),
+        ]
         logger.info("Initializing crawler...")
-        max_files = max_files if max_files > 0 else None
+        crawler = GitHubCrawler(
+            processors=processors,
+            branch=branch,
+            max_files=max_files
+        )
                 
         # Show configuration
         logger.info(f"Configuration:")
@@ -183,3 +105,30 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+def validate_environment():
+    """Validate required environment variables."""
+    required_env_vars = [
+        'AWS_ACCESS_KEY_ID',
+        'AWS_SECRET_ACCESS_KEY',
+        'AWS_REGION'
+    ]
+    
+    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
+    
+    if missing_vars:
+        logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+        logger.error("Please set the following environment variables:")
+        for var in missing_vars:
+            logger.error(f"  export {var}=your_value")
+        return False
+    
+    # Optional but recommended
+    optional_vars = ['GITHUB_TOKEN']
+    missing_optional = [var for var in optional_vars if not os.environ.get(var)]
+    
+    if missing_optional:
+        logger.warning(f"Optional environment variables not set: {', '.join(missing_optional)}")
+        logger.warning("Consider setting GITHUB_TOKEN for higher API rate limits")
+    
+    return True

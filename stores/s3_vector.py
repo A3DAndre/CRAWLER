@@ -107,7 +107,7 @@ class S3VectorStore(VectorStore):
                 # Prepare metadata
                 metadata = {
                     **chunk.metadata,
-                    "content_preview":  chunk.content,
+                    "content":  chunk.content,
                     "chunk_size": chunk.size,
                     "word_count": chunk.word_count,
                     "source": chunk.source
@@ -155,7 +155,7 @@ class S3VectorStore(VectorStore):
                 
                 result = SearchResult(
                     id=vector_result.get("vectorId", ""),
-                    content=metadata.get("content_preview", ""),
+                    content=metadata.get("content", ""),
                     source=metadata.get("source", ""),
                     score=1.0 - vector_result.get("distance", 1.0),  # Convert distance to similarity
                     metadata=metadata
