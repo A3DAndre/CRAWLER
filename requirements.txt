@@ -1,0 +1,16 @@
+# Core dependencies
+boto3>=1.28.0
+requests>=2.31.0
+nanoid>=2.0.0
+
+# Text processing
+langchain>=0.0.350
+langchain-text-splitters>=0.0.1
+
+# Optional: for better YAML parsing if implementing YAML processor
+# pyyaml>=6.0
+
+# Development dependencies (optional)
+pytest>=7.0.0
+# black>=23.0.0
+# flake8>=6.0.0
