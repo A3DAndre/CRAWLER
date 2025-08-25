@@ -28,12 +28,12 @@ class S3VectorStore(VectorStore):
         # AWS credentials
         self.aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         self.aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-        self.aws_region = os.environ.get("AWS_REGION", "us-east-2")
+        self.aws_region = os.environ.get("AWS_REGION", "us-west-2")
          
         # Initialize AWS clients
         self._init_clients()
         
-        logger.info(f"S3VectorStore initialized - Bucket: {bucket_name}, Index: {index_name}")
+        logger.info(f"S3VectorStore initialized - Bucket: {bucket_name}, Index: {index_name}, {self.aws_region}")
     
     def _init_clients(self):
         """Initialize AWS clients."""
