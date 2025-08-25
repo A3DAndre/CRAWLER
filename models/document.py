@@ -4,6 +4,7 @@ Data models for search results and documents.
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
+import json
 
 @dataclass
 class SearchResult:
@@ -24,7 +25,15 @@ class SearchResult:
             'score': self.score,
             'metadata': self.metadata
         }
-        
+    
+    def to_md(self) -> str:
+        """Formats the result to markdown with source score and metadata at the top and full content at the bottom"""
+        formatted = f"### {self.source}\n\n"
+        formatted += f"**Score:** {self.score}\n\n"
+        formatted += f"**Metadata:** {json.dumps(self.metadata, indent=2)}\n\n"
+        formatted += f"**Content:**\n{self.content}\n"
+        return formatted
+
     def __str__(self) -> str:
         return f"SearchResult(id={self.id}, content={self.content[:50]}, source={self.source}, score={self.score})"
 
