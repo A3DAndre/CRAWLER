@@ -5,7 +5,7 @@ GitHub repository crawler with dependency injection for processors.
 import os
 from typing import List, Dict, Optional
 from urllib.parse import urlparse
-from github import GitHub
+from crawler.github import GitHub
 from processors.abs import Processor
 from utils.logger import setup_logger
 

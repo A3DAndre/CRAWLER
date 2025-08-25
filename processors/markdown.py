@@ -113,9 +113,6 @@ class MarkdownProcessor(Processor):
             # Preprocess content
             processed_content = self.preprocess_content(content_without_fm)
             
-            # Extract document-level metadata
-            headers = self.extract_headers(processed_content)
-            analysis = self.analyze_content(processed_content)
             
             # Split into chunks
             text_chunks = self.text_splitter.split_text(processed_content)

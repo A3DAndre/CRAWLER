@@ -8,7 +8,7 @@ load_dotenv()
 import sys
 import os
 
-from crawler import GitHubCrawler
+from crawler.crawler import GitHubCrawler
 from stores.s3_vector import S3VectorStore
 from processors.abs import Processor
 from processors.markdown import MarkdownProcessor
@@ -58,7 +58,7 @@ def main():
         repo_url = "https://github.com/A3Data/a3wiki-backup"
         branch = "main"
         max_files = 100
-        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github2")
+        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github")
         
         processors = [
             # Implemented processors
