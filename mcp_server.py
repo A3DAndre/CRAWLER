@@ -8,14 +8,11 @@ logger = setup_logger(__name__)
 
 mcp = FastMCP(host="0.0.0.0", stateless_http=True)
 
-def get_store():
-    return S3VectorStore(bucket_name="a3wiki", index_name="github2")
-
 @mcp.tool()
 def search_a3_wiki(query: str):
     """Search A3 Data Wiki for relevant information"""
     logger.info(f"Searching A3 Data Wiki for query: {query}")
-    store = get_store()
+    store = S3VectorStore(bucket_name="a3wiki", index_name="github2")
     logger.info("Vector store initialized")
     results = store.search(query, limit=5)
 

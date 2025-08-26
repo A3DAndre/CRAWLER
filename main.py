@@ -58,7 +58,7 @@ def main():
         repo_url = "https://github.com/A3Data/a3wiki-backup"
         branch = "main"
         max_files = 100
-        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github")
+        vector_store = S3VectorStore(bucket_name="a3wiki", index_name="github2")
         
         processors = [
             # Implemented processors

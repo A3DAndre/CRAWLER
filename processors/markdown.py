@@ -122,9 +122,6 @@ class MarkdownProcessor(Processor):
                 if not chunk_text.strip():
                     continue
                 
-                # Find headers in this chunk
-                chunk_headers = self.extract_headers(chunk_text)
-                
                 # Create chunk metadata
                 chunk_metadata = {
                     **metadata,
