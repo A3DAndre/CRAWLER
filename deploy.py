@@ -280,17 +280,17 @@ def create_agentcore_role(agent_name):
 
 def configure_agent():
     print("Setting up Amazon Cognito user pool...")
-    cognito_config = setup_cognito_user_pool()
+    # cognito_config = setup_cognito_user_pool()
     print("Cognito setup completed ✓")
-    print(f"User Pool ID: {cognito_config.get('user_pool_id', 'N/A')}")
-    print(f"Client ID: {cognito_config.get('client_id', 'N/A')}")
+    # print(f"User Pool ID: {cognito_config.get('user_pool_id', 'N/A')}")
+    # print(f"Client ID: {cognito_config.get('client_id', 'N/A')}")
 
     boto_session = Session()
     region = boto_session.region_name
-    agent_name = "mcp_a3_wiki_agentcore"
+    agent_name = "agent_a3_wiki_agentcore"
     print(f"Using AWS region: {region}")
 
-    required_files = ['mcp_server.py', 'requirements.txt']
+    required_files = ['agent.py', 'requirements.txt']
     for file in required_files:
         if not os.path.exists(file):
             raise FileNotFoundError(f"Required file {file} not found")
@@ -298,14 +298,14 @@ def configure_agent():
 
     agentcore_runtime = Runtime()
 
-    auth_config = {
-        "customJWTAuthorizer": {
-            "allowedClients": [
-                cognito_config['client_id']
-            ],
-            "discoveryUrl": cognito_config['discovery_url'],
-        }
-    }
+    # auth_config = {
+    #     "customJWTAuthorizer": {
+    #         "allowedClients": [
+    #             cognito_config['client_id']
+    #         ],
+    #         "discoveryUrl": cognito_config['discovery_url'],
+    #     }
+    # }
     print(f"Creating IAM role for {agent_name}...")
     agentcore_iam_role = create_agentcore_role(agent_name=agent_name)
     agentcore_iam_role_arn = agentcore_iam_role['Role']['Arn']
@@ -317,13 +317,12 @@ def configure_agent():
 
     print("Configuring AgentCore Runtime...")
     response = agentcore_runtime.configure(
-        entrypoint="mcp_server.py",
+        entrypoint="agent.py",
         # auto_create_execution_role=True,
         auto_create_ecr=True,
         requirements_file="requirements.txt",
         region=region,
-        authorizer_configuration=auth_config,
-        protocol="MCP",
+        # authorizer_configuration=auth_config,
         agent_name=agent_name,
         execution_role=agentcore_iam_role['Role']['Arn']
     )
@@ -339,22 +338,22 @@ def configure_agent():
     ssm_client = boto3.client('ssm', region_name=region)
     secrets_client = boto3.client('secretsmanager', region_name=region)
 
-    try:
-        cognito_credentials_response = secrets_client.create_secret(
-            Name='mcp_server/cognito/credentials',
-            Description='Cognito credentials for MCP server',
-            SecretString=json.dumps(cognito_config)
-        )
-        print("✓ Cognito credentials stored in Secrets Manager")
-    except secrets_client.exceptions.ResourceExistsException:
-        secrets_client.update_secret(
-            SecretId='mcp_server/cognito/credentials',
-            SecretString=json.dumps(cognito_config)
-        )
-        print("✓ Cognito credentials updated in Secrets Manager")
+    # try:
+    #     cognito_credentials_response = secrets_client.create_secret(
+    #         Name=f'/{agent_name}/cognito/credentials',
+    #         Description='Cognito credentials for MCP server',
+    #         SecretString=json.dumps(cognito_config)
+    #     )
+    #     print("✓ Cognito credentials stored in Secrets Manager")
+    # except secrets_client.exceptions.ResourceExistsException:
+    #     secrets_client.update_secret(
+    #         SecretId=f'/{agent_name}/cognito/credentials',
+    #         SecretString=json.dumps(cognito_config)
+    #     )
+    #     print("✓ Cognito credentials updated in Secrets Manager")
 
     agent_arn_response = ssm_client.put_parameter(
-        Name='/mcp_server/runtime/agent_arn',
+        Name=f'/{agent_name}/runtime/agent_arn',
         Value=launch_result.agent_arn,
         Type='String',
         Description='Agent ARN for MCP server',
