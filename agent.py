@@ -10,7 +10,6 @@ logger = setup_logger(__name__)
 app = BedrockAgentCoreApp()
 
 
-
 @tool()
 def search_a3_wiki(query: str):
     """Search A3 Data Wiki for relevant information"""
@@ -25,7 +24,7 @@ def search_a3_wiki(query: str):
     return markdown_response
 
 
-model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+model_id = "us.anthropic.claude-sonnet-4-20250514-v1:0"
 model = BedrockModel(
     model_id=model_id,
 )
@@ -44,7 +43,13 @@ def strands_agent_bedrock(payload):
     user_input = payload.get("prompt")
     print("User input:", user_input)
     response = agent(user_input)
+    print("Agent response:", response)
     return response.message['content'][0]['text']
+    # stream = agent.stream_async(user_input)
+    # async for event in stream:
+    #     print(event)
+    #     yield (event)
+
 
 if __name__ == "__main__":
     app.run()
