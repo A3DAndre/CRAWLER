@@ -73,20 +73,6 @@ class MarkdownProcessor(Processor):
         
         return headers
     
-    def analyze_content(self, content: str) -> Dict[str, Any]:
-        """Analyze markdown content and extract metadata."""
-        analysis = {
-            'code_blocks': len(re.findall(r'```[\s\S]*?```', content)),
-            'inline_code': len(re.findall(r'`[^`\n]+`', content)),
-            'links': len(re.findall(r'\[([^\]]+)\]\(([^)]+)\)', content)),
-            'images': len(re.findall(r'!\[([^\]]*)\]\(([^)]+)\)', content)),
-            'tables': len(re.findall(r'\|.*\|', content)),
-            'lists': len(re.findall(r'^\s*[-*+]\s+', content, re.MULTILINE)),
-            'numbered_lists': len(re.findall(r'^\s*\d+\.\s+', content, re.MULTILINE))
-        }
-        
-        return analysis
-    
     def preprocess_content(self, content: str) -> str:
         """Clean and preprocess markdown content."""
         # Clean content using base method
@@ -132,10 +118,6 @@ class MarkdownProcessor(Processor):
                     # 'document_headers': headers,
                     # 'chunk_headers': chunk_headers,
                     # 'content_analysis': analysis,
-                    # 'has_code': '```' in chunk_text or '`' in chunk_text,
-                    # 'has_links': '[' in chunk_text and '](' in chunk_text,
-                    # 'has_images': '![' in chunk_text,
-                    # 'main_title': headers[0]['text'] if headers else None
                 }
                 
                 # Create chunk with source reference

@@ -42,13 +42,21 @@ def strands_agent_bedrock(payload):
     """
     user_input = payload.get("prompt")
     print("User input:", user_input)
-    response = agent(user_input)
-    print("Agent response:", response)
-    return response.message['content'][0]['text']
-    # stream = agent.stream_async(user_input)
-    # async for event in stream:
-    #     print(event)
-    #     yield (event)
+    should_stream = payload.get("stream", False)
+    
+    
+    if should_stream:
+        stream = agent.stream_async(user_input)
+        async def event_generator():
+            async for event in stream:
+                print(event)
+                yield event
+        return event_generator()
+    else: 
+        response = agent(user_input)
+        print("Agent response:", response)
+        return response.message['content'][0]['text']
+
 
 
 if __name__ == "__main__":
