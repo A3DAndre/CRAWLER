@@ -3,7 +3,7 @@ import boto3
 import json
 import time
 from boto3.session import Session
-from aws.iam_stmt import IamStatement, StmtIAM, StatementFunction
+from aws.iam_stmt import IamStatement, Stmt, StatementFunction
 
 def create_role_policy(agent_name: str, stmt_fns: list[StatementFunction] = None) -> dict[str, Any]:
     """
@@ -21,46 +21,19 @@ def create_role_policy(agent_name: str, stmt_fns: list[StatementFunction] = None
     
     boto_session = Session()
     region = boto_session.region_name
-    account_id = boto3.client("sts").get_caller_identity()["Account"]
+    account_id: str = boto3.client("sts").get_caller_identity()["Account"]
     
-    # Base policy statements
-    base_statements: list[IamStatement] = StmtIAM.base_agentcore_stmts(agent_name,region, account_id)
-    
-    role_policy: dict[str, Any] = {
-        "Version": "2012-10-17",
-        "Statement": base_statements.copy()
-    }
-    
-    # Add dynamic statements by calling each function
+    stmts= Stmt.base_agentcore(agent_name)(region, account_id)
+
     for stmt_fn in stmt_fns:
         dynamic_statement = stmt_fn(region, account_id)
-        role_policy["Statement"].append(dynamic_statement)
+        stmts.extend(dynamic_statement)
     
-    return role_policy
-
-def create_assume_role_policy(account_id: str, region: str) -> dict[str, Any]:
-    """Create assume role policy document"""
     return {
         "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Sid": "AssumeRolePolicy",
-                "Effect": "Allow",
-                "Principal": {
-                    "Service": "bedrock-agentcore.amazonaws.com"
-                },
-                "Action": "sts:AssumeRole",
-                "Condition": {
-                    "StringEquals": {
-                        "aws:SourceAccount": f"{account_id}"
-                    },
-                    "ArnLike": {
-                        "aws:SourceArn": f"arn:aws:bedrock-agentcore:{region}:{account_id}:*"
-                    }
-                }
-            }
-        ]
+        "Statement": stmts,
     }
+    
 
 def create_agentcore_role(agent_name: str, stmt_fns: list[StatementFunction] = None) -> dict[str, Any]:
     """
@@ -84,7 +57,7 @@ def create_agentcore_role(agent_name: str, stmt_fns: list[StatementFunction] = N
     
     # Create policy documents
     role_policy = create_role_policy(agent_name, stmt_fns)
-    assume_role_policy = create_assume_role_policy(account_id, region)
+    assume_role_policy = Stmt.agent_core_assume_role(account_id)(region, account_id)[0]
     
     assume_role_policy_json = json.dumps(assume_role_policy)
     role_policy_json = json.dumps(role_policy)
@@ -126,20 +99,3 @@ def create_agentcore_role(agent_name: str, stmt_fns: list[StatementFunction] = N
         print(f"Error attaching policy: {e}")
     
     return agentcore_iam_role
-
-# Usage examples:
-if __name__ == "__main__":
-    # Create statement functions
-    s3_vectors_stmt = StmtIAM.query_s3_vectors("my-bucket", "my-index")
-    s3_bucket_stmt = StmtIAM.s3_bucket_access("my-bucket")
-    lambda_stmt = StmtIAM.lambda_invoke_function("my-function")
-    
-    # Create role with dynamic statements
-    statements: list[StatementFunction] = [
-        s3_vectors_stmt,
-        s3_bucket_stmt,
-        lambda_stmt
-    ]
-    
-    role = create_agentcore_role("my-agent", statements)
-    print(f"Created role: {role['Role']['RoleName']}")

@@ -29,7 +29,7 @@ class S3VectorStore(VectorStore):
         self.aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         self.aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
         self.aws_region = os.environ.get("AWS_REGION", "us-west-2")
-         
+        self.aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
         # Initialize AWS clients
         self._init_clients()
         
@@ -46,13 +46,15 @@ class S3VectorStore(VectorStore):
                 "s3vectors",
                 region_name=self.aws_region,
                 aws_access_key_id=self.aws_access_key_id,
-                aws_secret_access_key=self.aws_secret_access_key
+                aws_secret_access_key=self.aws_secret_access_key,
+                aws_session_token=self.aws_session_token
             )
             self.bedrock_client = boto3.client(
                 "bedrock-runtime",
                 region_name=self.aws_region,
                 aws_access_key_id=self.aws_access_key_id,
-                aws_secret_access_key=self.aws_secret_access_key
+                aws_secret_access_key=self.aws_secret_access_key,
+                aws_session_token=self.aws_session_token
             )
         else:
             logger.info("Using AWS default credentials")
@@ -183,18 +185,7 @@ class S3VectorStore(VectorStore):
     
     def get_by_id(self, document_id: str) -> Optional[Document]:
         """Retrieve a document by its ID."""
-        try:
-            # Note: S3 vectors doesn't have a direct get_by_id method
-            # This is a simplified implementation - in practice you might need
-            # to store document metadata separately or use a different approach
-            
-            # For now, we'll return None and log that this needs implementation
-            logger.warning(f"get_by_id not fully implemented for S3 vectors: {document_id}")
-            return None
-            
-        except Exception as e:
-            logger.error(f"Error retrieving document {document_id}: {str(e)}")
-            return None
+        raise NotImplementedError("get_by_id method is not implemented yet.")
     
     def health_check(self) -> bool:
         """Check if the vector store is accessible."""

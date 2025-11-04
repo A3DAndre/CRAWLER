@@ -5,17 +5,13 @@ nanoid>=2.0.0
 mcp>=1.10.0
 bedrock-agentcore
 bedrock-agentcore-starter-toolkit
-strands-agents
-strands-agents-tools
 httpx
 # Text processing
 langchain>=0.0.350
 langchain-text-splitters>=0.0.1
-
-# Optional: for better YAML parsing if implementing YAML processor
-# pyyaml>=6.0
-
-# Development dependencies (optional)
-# pytest>=7.0.0
-# black>=23.0.0
-# flake8>=6.0.0
+# strands agent
+strands-agents
+strands-agents-tools
+# langchain agent
+langgraph
+langchain_aws

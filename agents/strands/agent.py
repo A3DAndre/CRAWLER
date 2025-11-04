@@ -11,7 +11,7 @@ app = BedrockAgentCoreApp()
 
 
 @tool()
-def search_a3_wiki(query: str):
+def search_a3_wiki(query: str) -> str:
     """Search A3 Data Wiki for relevant information"""
     logger.info(f"Searching A3 Data Wiki for query: {query}")
     store = S3VectorStore(bucket_name="a3wiki", index_name="github2")
@@ -24,7 +24,7 @@ def search_a3_wiki(query: str):
     return markdown_response
 
 
-model_id = "us.anthropic.claude-sonnet-4-20250514-v1:0"
+model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
 model = BedrockModel(
     model_id=model_id,
 )
