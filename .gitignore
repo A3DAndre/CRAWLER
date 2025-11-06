@@ -9,3 +9,4 @@ __pycache__/
 !.env.example
 
 .bedrock_agentcore.yaml
+Dockerfile
